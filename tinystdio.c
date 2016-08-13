@@ -183,7 +183,7 @@ static int a2d(char ch)
         return -1;
 }
 
-static char a2u(char ch, const char **src, int base, unsigned int *nump)
+static char a2u(char ch, const char **src, int base, int *nump)
 {
     const char *p = *src;
     unsigned int num = 0;
@@ -867,7 +867,7 @@ int tfp_vsscanf(const char* str, const char* format, ...)
 
                         case 's':
                                 pos = 0;
-                                char* tab = va_arg(ap, char**);
+                                char* tab = va_arg(ap, char*);
                                 while (*str != ' ' && *str != 0)
                                     *(tab++) = *str++;
                                 *tab = 0;
