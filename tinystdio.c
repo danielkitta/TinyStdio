@@ -213,7 +213,7 @@ void float_to_s(double a, char buffer[])
 }
 
 
-double s_to_float(char* str)
+double s_to_float(const char* str)
 {
 
 	int neg;
@@ -592,7 +592,7 @@ void init_printf(void *putp, putcf putf)
     stdout_putp = putp;
 }
 
-void tfp_printf(char *fmt, ...)
+void tfp_printf(const char *fmt, ...)
 {
     va_list va;
     va_start(va, fmt);
@@ -600,7 +600,7 @@ void tfp_printf(char *fmt, ...)
     va_end(va);
 }
 
-void tfp_vprintf(char *fmt, va_list va)
+void tfp_vprintf(const char *fmt, va_list va)
 {
     tfp_format(stdout_putp, stdout_putf, fmt, va);
 }
