@@ -199,64 +199,6 @@ static char a2u(char ch, const char **src, int base, int *nump)
     return ch;
 }
 
-
-void float_to_s(double a, char buffer[])
-{
-	if (a < 0)
-	{
-		a = -a;
-		tfp_sprintf(buffer, "-%d.%d", (int)a, (int)((a - (int)a)*1000));
-	}
-	else
-		tfp_sprintf(buffer, "%d.%d", (int)a, (int)((a - (int)a)*1000));
-
-}
-
-
-double s_to_float(const char* str)
-{
-
-	int neg;
-	double fvalue = 0;
-	int pos;
-
-    if (*str == '-')
-    {
-        neg = 1;
-        str++;
-    }
-    else
-        neg = 0;
-
-    int point_flag = 0;
-    int exp = 0;
-    for (fvalue = 0, pos = 0; *str != 0 ; str++, pos++)
-    {
-
-            if (*str == '.')
-            {
-                point_flag = 1;
-                str++;
-            }
-            if ('0' <= *str && *str <= '9')
-                    fvalue = fvalue*10 + (int)(*str - '0');
-            else
-                    break;
-            if (point_flag == 1)
-                exp++;
-
-    }
-
-    if (pos == 0)
-            return 0;
-    for (pos = 0; pos < exp; pos++)
-        fvalue = fvalue/10.0;
-
-    return neg ? -fvalue : fvalue;
-
-
-}
-
 static void putchw(void *putp, putcf putf, struct param *p)
 {
     char ch;
