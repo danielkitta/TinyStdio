@@ -633,13 +633,17 @@ int tfp_sprintf(char *str, const char *format, ...)
   va_end(ap);
   return retval;
 }
+#endif
 
+#if TINYPRINTF_DEFINE_TFP_SSCANF
 int tfp_vsscanf(const char* str, const char* format, ...)
 {
         va_list ap;
         int value, tmp;
+#if PRINTF_FLOAT_SUPPORT
         float  fvalue;
         double Fvalue;
+#endif
         int count = 0;
         int pos;
         char neg, fmt_code;
@@ -741,6 +745,7 @@ int tfp_vsscanf(const char* str, const char* format, ...)
                                 *(va_arg(ap, int*)) = neg ? -value : value;
                                 count++;
                                 break;
+#if PRINTF_FLOAT_SUPPORT
                         case 'f':
                                 if (*str == '-')
                                 {
@@ -812,7 +817,7 @@ int tfp_vsscanf(const char* str, const char* format, ...)
 							   *(va_arg(ap, double*)) = neg ? -Fvalue : Fvalue;
 							   count++;
 							   break;
-
+#endif /* PRINTF_FLOAT_SUPPORT */
                         case 'c':
                                 *(va_arg(ap, char*)) = *str;
                                 count++;
@@ -841,5 +846,4 @@ int tfp_vsscanf(const char* str, const char* format, ...)
 
         return count;
 }
-
-#endif
+#endif /* TINYPRINTF_DEFINE_TFP_SSCANF */

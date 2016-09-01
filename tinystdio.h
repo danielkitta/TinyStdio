@@ -128,6 +128,10 @@ Update from  Cebotari Vladislav
 # define TINYPRINTF_DEFINE_TFP_SPRINTF 1
 #endif
 
+#ifndef TINYPRINTF_DEFINE_TFP_SSCANF
+# define TINYPRINTF_DEFINE_TFP_SSCANF 0
+#endif
+
 /* Set this to 0 if you do not want tfp_printf and
    tfp_{vsn,sn,vs,s}printf to be also available as
    printf/{vsn,sn,vs,s}printf */
@@ -161,7 +165,10 @@ typedef void (*putcf) (void *, char);
    callback and pass to it the right 'putp' it is expecting.
 */
 void tfp_format(void *putp, putcf putf, const char *fmt, va_list va);
+
+#if TINYPRINTF_DEFINE_TFP_SSCANF
 int tfp_vsscanf(const char* str, const char* format, ...);
+#endif
 
 #if TINYPRINTF_DEFINE_TFP_SPRINTF
 int tfp_vsnprintf(char *str, size_t size, const char *fmt, va_list ap);
