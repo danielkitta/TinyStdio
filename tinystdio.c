@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /* Enable long long int support (implies long int support) */
 #ifndef PRINTF_LONG_LONG_SUPPORT
-# define PRINTF_LONG_LONG_SUPPORT 1
+# define PRINTF_LONG_LONG_SUPPORT 0
 #endif
 
 #if PRINTF_LONG_LONG_SUPPORT
@@ -264,7 +264,7 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
     int    ffactor;
     int    sign;
 #endif
-#if PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT || (PRINTF_LONG_SUPPORT && SIZEOF_LONG > 4)
     char bf[23];  /* long = 64b on some architectures */
 #else
     char bf[12];  /* int = 32b on some architectures */
