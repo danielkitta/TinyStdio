@@ -113,6 +113,7 @@ Update from  Cebotari Vladislav
 #define __TFP_PRINTF__
 
 #include <stdarg.h>
+#include <stddef.h>
 
 /* Global configuration */
 
@@ -132,12 +133,6 @@ Update from  Cebotari Vladislav
    printf/{vsn,sn,vs,s}printf */
 #ifndef TINYPRINTF_OVERRIDE_LIBC
 # define TINYPRINTF_OVERRIDE_LIBC 0
-#endif
-
-/* Optional external types dependencies */
-
-#if TINYPRINTF_DEFINE_TFP_SPRINTF
-# include <sys/types.h>  /* size_t */
 #endif
 
 /* Declarations */

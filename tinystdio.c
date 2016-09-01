@@ -20,30 +20,32 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "tinystdio.h"
-
+#include <stddef.h>
 
 /*
  * Configuration
  */
 
-/* Enable long int support */
-#define PRINTF_LONG_SUPPORT
-
 /* Enable long long int support (implies long int support) */
-#define PRINTF_LONG_LONG_SUPPORT
-
-/* Enable %z (size_t) support */
-#define PRINTF_SIZE_T_SUPPORT
-
-/*
- * Configuration adjustments
- */
-#ifdef PRINTF_SIZE_T_SUPPORT
-#include <sys/types.h>
+#ifndef PRINTF_LONG_LONG_SUPPORT
+# define PRINTF_LONG_LONG_SUPPORT 1
 #endif
 
-#ifdef PRINTF_LONG_LONG_SUPPORT
-# define PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT
+# define PRINTF_LONG_SUPPORT 1
+#endif
+
+#ifndef PRINTF_LONG_SUPPORT
+# define PRINTF_LONG_SUPPORT 1
+#endif
+
+#ifndef PRINTF_FLOAT_SUPPORT
+# define PRINTF_FLOAT_SUPPORT 0
+#endif
+
+/* Enable %z (size_t) support */
+#ifndef PRINTF_SIZE_T_SUPPORT
+# define PRINTF_SIZE_T_SUPPORT 1
 #endif
 
 /* __SIZEOF_<type>__ defined at least by gcc */
@@ -82,7 +84,7 @@ struct param {
 };
 
 
-#ifdef PRINTF_LONG_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT
 static void _TFP_GCC_NO_INLINE_ ulli2a(
     unsigned long long int num, struct param *p)
 {
@@ -113,7 +115,7 @@ static void lli2a(long long int num, struct param *p)
 }
 #endif
 
-#ifdef PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_SUPPORT
 static void uli2a(unsigned long int num, struct param *p)
 {
     int n = 0;
@@ -254,13 +256,15 @@ static void putchw(void *putp, putcf putf, struct param *p)
 void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 {
     struct param p;
+#if PRINTF_FLOAT_SUPPORT
     double fval;
     int    temp_buffer[10];
     int    fpart;
     int    fiter;
     int    ffactor;
     int    sign;
-#ifdef PRINTF_LONG_SUPPORT
+#endif
+#if PRINTF_LONG_SUPPORT
     char bf[23];  /* long = 64b on some architectures */
 #else
     char bf[12];  /* int = 32b on some architectures */
@@ -272,7 +276,7 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
         if (ch != '%') {
             putf(putp, ch);
         } else {
-#ifdef PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_SUPPORT
             char lng = 0;  /* 1 for long, 2 for long long */
 #endif
             /* Init parameter struct */
@@ -325,13 +329,13 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 
             }
 
-#ifdef PRINTF_SIZE_T_SUPPORT
-# ifdef PRINTF_LONG_SUPPORT
+#if PRINTF_SIZE_T_SUPPORT
+# if PRINTF_LONG_SUPPORT
             if (ch == 'z') {
                 ch = *(fmt++);
                 if (sizeof(size_t) == sizeof(unsigned long int))
                     lng = 1;
-#  ifdef PRINTF_LONG_LONG_SUPPORT
+#  if PRINTF_LONG_LONG_SUPPORT
                 else if (sizeof(size_t) == sizeof(unsigned long long int))
                     lng = 2;
 #  endif
@@ -339,11 +343,11 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 # endif
 #endif
 
-#ifdef PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_SUPPORT
             if (ch == 'l') {
                 ch = *(fmt++);
                 lng = 1;
-#ifdef PRINTF_LONG_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT
                 if (ch == 'l') {
                   ch = *(fmt++);
                   lng = 2;
@@ -356,8 +360,8 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
                 goto abort;
             case 'u':
                 p.base = 10;
-#ifdef PRINTF_LONG_SUPPORT
-#ifdef PRINTF_LONG_LONG_SUPPORT
+#if PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
                     ulli2a(va_arg(va, unsigned long long int), &p);
                 else
@@ -372,8 +376,8 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case 'd':
             case 'i':
                 p.base = 10;
-#ifdef PRINTF_LONG_SUPPORT
-#ifdef PRINTF_LONG_LONG_SUPPORT
+#if PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
                     lli2a(va_arg(va, long long int), &p);
                 else
@@ -400,8 +404,8 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case 'X':
                 p.base = 16;
                 p.uc = (ch == 'X')?1:0;
-#ifdef PRINTF_LONG_SUPPORT
-#ifdef PRINTF_LONG_LONG_SUPPORT
+#if PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
                     ulli2a(va_arg(va, unsigned long long int), &p);
                 else
@@ -429,6 +433,7 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case '%':
                 putf(putp, ch);
                 break;
+#if PRINTF_FLOAT_SUPPORT
             case 'f':
             case 'F':
                 fval  = va_arg(va, double);
@@ -513,6 +518,7 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
                     putf(putp, '0' + (temp_buffer[fiter--]));
                 }
                 break;
+#endif /* PRINTF_FLOAT_SUPPORT */
             default:
                 break;
             }
