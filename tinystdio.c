@@ -116,7 +116,7 @@ static void lli2a(long long int num, struct param *p)
 }
 #endif
 
-#if PRINTF_LONG_SUPPORT
+#if (PRINTF_LONG_SUPPORT && SIZEOF_LONG > SIZEOF_INT)
 static void uli2a(unsigned long int num, struct param *p)
 {
     int n = 0;
@@ -277,7 +277,7 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
         if (ch != '%') {
             putf(putp, ch);
         } else {
-#if PRINTF_LONG_SUPPORT
+#if PRINTF_LONG_LONG_SUPPORT || (PRINTF_LONG_SUPPORT && SIZEOF_LONG > SIZEOF_INT)
             char lng = 0;  /* 1 for long, 2 for long long */
 #endif
             /* Init parameter struct */
@@ -334,8 +334,10 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 # if PRINTF_LONG_SUPPORT
             if (ch == 'z') {
                 ch = *(fmt++);
+#  if SIZEOF_LONG > SIZEOF_INT
                 if (sizeof(size_t) == sizeof(unsigned long int))
                     lng = 1;
+#  endif
 #  if PRINTF_LONG_LONG_SUPPORT
                 else if (sizeof(size_t) == sizeof(unsigned long long int))
                     lng = 2;
@@ -347,13 +349,15 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
 #if PRINTF_LONG_SUPPORT
             if (ch == 'l') {
                 ch = *(fmt++);
+# if SIZEOF_LONG > SIZEOF_INT
                 lng = 1;
-#if PRINTF_LONG_LONG_SUPPORT
+# endif
+# if PRINTF_LONG_LONG_SUPPORT
                 if (ch == 'l') {
                   ch = *(fmt++);
                   lng = 2;
                 }
-#endif
+# endif
             }
 #endif
             switch (ch) {
@@ -362,14 +366,16 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case 'u':
                 p.base = 10;
 #if PRINTF_LONG_SUPPORT
-#if PRINTF_LONG_LONG_SUPPORT
+# if PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
                     ulli2a(va_arg(va, unsigned long long int), &p);
                 else
-#endif
-                  if (1 == lng)
+# endif
+# if SIZEOF_LONG > SIZEOF_INT
+                if (1 == lng)
                     uli2a(va_arg(va, unsigned long int), &p);
                 else
+# endif
 #endif
                     ui2a(va_arg(va, unsigned int), &p);
                 putchw(putp, putf, &p);
@@ -378,14 +384,16 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case 'i':
                 p.base = 10;
 #if PRINTF_LONG_SUPPORT
-#if PRINTF_LONG_LONG_SUPPORT
+# if PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
                     lli2a(va_arg(va, long long int), &p);
                 else
-#endif
-                  if (1 == lng)
+# endif
+# if SIZEOF_LONG > SIZEOF_INT
+                if (1 == lng)
                     li2a(va_arg(va, long int), &p);
                 else
+# endif
 #endif
                     i2a(va_arg(va, int), &p);
                 putchw(putp, putf, &p);
@@ -394,7 +402,7 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
             case 'p':
                 p.alt = 1;
 # if defined(SIZEOF_INT) && SIZEOF_POINTER <= SIZEOF_INT
-                lng = 0;
+                /* lng = 0; */
 # elif defined(SIZEOF_LONG) && SIZEOF_POINTER <= SIZEOF_LONG
                 lng = 1;
 # elif defined(SIZEOF_LONG_LONG) && SIZEOF_POINTER <= SIZEOF_LONG_LONG
@@ -406,14 +414,16 @@ void tfp_format(void *putp, putcf putf, const char *fmt, va_list va)
                 p.base = 16;
                 p.uc = (ch == 'X')?1:0;
 #if PRINTF_LONG_SUPPORT
-#if PRINTF_LONG_LONG_SUPPORT
+# if PRINTF_LONG_LONG_SUPPORT
                 if (2 == lng)
                     ulli2a(va_arg(va, unsigned long long int), &p);
                 else
-#endif
-                  if (1 == lng)
+# endif
+# if SIZEOF_LONG > SIZEOF_INT
+                if (1 == lng)
                     uli2a(va_arg(va, unsigned long int), &p);
                 else
+# endif
 #endif
                     ui2a(va_arg(va, unsigned int), &p);
                 putchw(putp, putf, &p);
